@@ -1,11 +1,15 @@
 import { useState } from 'react'
 
 const PhoneBook = () => {
-  const [persons, setPersons] = useState([
-    {name: 'Arto Hellas', number: '123-123-1223' }
-  ]) 
+    const [persons, setPersons] = useState([
+        { name: 'Arto Hellas', number: '040-123456', id: 1 },
+        { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
+        { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
+        { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
+      ])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [filter, setFilter] = useState('')
 
   const handleNewName = (event) => {
     setNewName(event.target.value)
@@ -14,6 +18,12 @@ const PhoneBook = () => {
   const handleNewNumber = (event) => {
     setNewNumber(event.target.value)
   }
+
+  const handleFilter = (event) => {
+    const fil = event.target.value;
+    setFilter(fil)
+  }
+
 
   const handleNewContact = (event) => {
     event.preventDefault()
@@ -34,6 +44,9 @@ const PhoneBook = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <div>
+        <p>filter shown with <input value={filter} onChange={handleFilter} /></p>
+      </div>
       <form onSubmit={handleNewContact}>
         <div>
           name: <input value={newName} onChange={handleNewName} />
@@ -47,7 +60,16 @@ const PhoneBook = () => {
       </form>
       <h2>Numbers</h2>
         <ul>
-            {persons.map(person => <li key={person.name}>{person.name} {person.number}</li> )}
+            {persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase())).map(person => <li key={person.name}>{person.name} {person.number}</li>)}
+           
+            {/* {persons.map(person => {     const filterPersons = persons.filter(person => person.name.toLowerCase.filter(fil.toLowerCase))
+                <li key={person.name}>{person.name} {person.number}</li>
+            } )} */
+            
+            //let f = persons.filter(person => person.name.includes(filter))
+
+            
+            }
         </ul>
     </div>
   )
