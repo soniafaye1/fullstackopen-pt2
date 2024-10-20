@@ -2,20 +2,24 @@ import { useState } from 'react'
 
 const PhoneBook = () => {
   const [persons, setPersons] = useState([
-    {name: 'Arto Hellas' }
+    {name: 'Arto Hellas', number: '123-123-1223' }
   ]) 
   const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
 
   const handleNewName = (event) => {
     setNewName(event.target.value)
   }
+  
+  const handleNewNumber = (event) => {
+    setNewNumber(event.target.value)
+  }
 
-  const handleNewPerson = (event) => {
+  const handleNewContact = (event) => {
     event.preventDefault()
-    console.log("name: ", persons.map(person => person.name))
-    
     const newPerson = {
-        name: newName
+        name: newName,
+        number: newNumber
     }
     //map over person names, if newName idx = -1  means person is not in array -> add new person 
     if(persons.map((person) => person.name).indexOf(newName) === -1){
@@ -24,14 +28,18 @@ const PhoneBook = () => {
         window.alert("person exists")
     }
     setNewName('') 
+    setNewNumber('')
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <form onSubmit={handleNewPerson}>
+      <form onSubmit={handleNewContact}>
         <div>
           name: <input value={newName} onChange={handleNewName} />
+        </div>
+        <div>
+            number: <input value={newNumber} onChange={handleNewNumber} />
         </div>
         <div>
           <button type="submit">add</button>
@@ -39,7 +47,7 @@ const PhoneBook = () => {
       </form>
       <h2>Numbers</h2>
         <ul>
-            {persons.map(person => <li key={person.name}>{person.name}</li> )}
+            {persons.map(person => <li key={person.name}>{person.name} {person.number}</li> )}
         </ul>
     </div>
   )
