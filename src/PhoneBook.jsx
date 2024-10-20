@@ -5,7 +5,6 @@ const PhoneBook = () => {
     {name: 'Arto Hellas' }
   ]) 
   const [newName, setNewName] = useState('')
-  const [nameExists, setNameExists] = useState(true)
 
   const handleNewName = (event) => {
     setNewName(event.target.value)
@@ -13,15 +12,19 @@ const PhoneBook = () => {
 
   const handleNewPerson = (event) => {
     event.preventDefault()
+    console.log("name: ", persons.map(person => person.name))
+    
     const newPerson = {
         name: newName
     }
-
-    setPersons(persons.concat(newPerson))
-    setNewName('')
+    //map over person names, if newName idx = -1  means person is not in array -> add new person 
+    if(persons.map((person) => person.name).indexOf(newName) === -1){
+        setPersons(persons.concat(newPerson))
+    }else{
+        window.alert("person exists")
+    }
+    setNewName('') 
   }
-
-  const existsAlready = nameExists ? persons.filter(person => persons.includes(person.name)) : newName;
 
   return (
     <div>
@@ -30,7 +33,6 @@ const PhoneBook = () => {
         <div>
           name: <input value={newName} onChange={handleNewName} />
         </div>
-        {!existsAlready ? alert(`${newName} already exists`) : "" }
         <div>
           <button type="submit">add</button>
         </div>
