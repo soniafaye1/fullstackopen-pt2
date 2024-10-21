@@ -1,7 +1,7 @@
 import Course from "./Course"
 import Notes from "./Notes"
 
-const App = () => {
+const CourseInfo = () => {
   const courses = [
     {
       name: 'Half Stack application development',
@@ -54,4 +54,4 @@ const App = () => {
   )
 }
 
-export default App
+export default CourseInfo

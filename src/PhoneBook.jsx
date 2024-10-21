@@ -1,8 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import phoneService from './services/phoneNumbers'
 
-const Persons = ({persons, filter}) => (
+const Persons = ({persons, filter, handleDeleteContact}) => (
     <ul>
-        {persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase())).map(person => <li key={person.name}>{person.name} {person.number}</li>)}
+        {persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase())).map(person => 
+            <li key={person.name}>
+                {person.name} {person.number}
+                <button onClick={handleDeleteContact(person.id)} />
+            </li>
+        )}
     </ul>
 )
 
@@ -61,13 +67,23 @@ const PhoneBook = () => {
     }
     //map over person names, if newName idx = -1  means person is not in array -> add new person 
     if(persons.map((person) => person.name).indexOf(newName) === -1){
-        setPersons(persons.concat(newPerson))
+        phoneService.create(newPerson).then(returnedPerson => {setPersons(persons.concat(returnedPerson))})
     }else{
         window.alert("person exists")
     }
     setNewName('') 
     setNewNumber('')
   }
+
+  const handleDeleteContact = (id) => {
+    phoneService.deletePerson(id).then(returnedPeople => {
+        setPersons(returnedPeople)
+    })
+  }
+
+  useEffect(() => {
+    phoneService.getAll().then(allPersons => setPersons(allPersons))
+  })
 
   return (
     <div>
@@ -78,7 +94,7 @@ const PhoneBook = () => {
       <PersonForm newName={newName} handleNewName={handleNewName} newNumber={newNumber} handleNewNumber={handleNewNumber}handleNewContact={handleNewContact} />
 
       <h3>Numbers</h3>
-      <Persons persons={persons} filter={filter}/>
+      <Persons persons={persons} filter={filter} handleDeleteContact={handleDeleteContact}/>
     </div>
   )
 }
