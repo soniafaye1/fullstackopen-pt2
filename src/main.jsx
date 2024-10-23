@@ -6,8 +6,8 @@ import PhoneBook from './PhoneBook.jsx'
 ReactDOM.createRoot(document.getElementById("root")).render(
   <>
     {/* <CourseInfo /> */}
-    {/* <PhoneBook /> */}
-    <Notes/>
+    <PhoneBook />
+    {/* <Notes/> */}
   </>
 );
 

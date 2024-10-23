@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import phoneService from './services/phoneNumbers'
 
-const Persons = ({persons, filter, handleDeleteContact}) => (
+const Persons = ({persons, filter, deleteContact}) => (
     <ul>
         {persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase())).map(person => 
             <li key={person.name}>
                 {person.name} {person.number}
-                <button onClick={handleDeleteContact(person.id)} />
+                <button onClick={() => deleteContact(person.id)}>delete</button>
             </li>
         )}
     </ul>
@@ -63,27 +63,34 @@ const PhoneBook = () => {
     event.preventDefault()
     const newPerson = {
         name: newName,
-        number: newNumber
+        number: newNumber,
+        id: String(persons.length + 1),
     }
-    //map over person names, if newName idx = -1  means person is not in array -> add new person 
-    if(persons.map((person) => person.name).indexOf(newName) === -1){
-        phoneService.create(newPerson).then(returnedPerson => {setPersons(persons.concat(returnedPerson))})
+
+    let nameExists = persons.find(p => p.name.toLowerCase() === newPerson.name.toLowerCase())
+    nameExists.number = newNumber;
+
+    console.log("existing name: ", nameExists)
+
+    if(nameExists && window.confirm(`are you sure you want to update ${nameExists.name}'s number ?`) ){
+        phoneService.update(nameExists.id, nameExists).then(updatedPerson => {console.log("uP: ", updatedPerson); setPersons(persons.map(p => p.id === nameExists.id ? updatedPerson : p))}).catch(e => console.log(e))
+
     }else{
-        window.alert("person exists")
+        phoneService.create(newPerson).then(returnedPerson => {setPersons(persons.concat(returnedPerson))})
+
     }
+
     setNewName('') 
     setNewNumber('')
   }
 
-  const handleDeleteContact = (id) => {
-    phoneService.deletePerson(id).then(returnedPeople => {
-        setPersons(returnedPeople)
-    })
+  const deleteContact = (id) => {
+    phoneService.deletePerson(id).then(setPersons(persons.filter(p => p.id !== id)))
   }
 
   useEffect(() => {
     phoneService.getAll().then(allPersons => setPersons(allPersons))
-  })
+  },[])
 
   return (
     <div>
@@ -94,7 +101,7 @@ const PhoneBook = () => {
       <PersonForm newName={newName} handleNewName={handleNewName} newNumber={newNumber} handleNewNumber={handleNewNumber}handleNewContact={handleNewContact} />
 
       <h3>Numbers</h3>
-      <Persons persons={persons} filter={filter} handleDeleteContact={handleDeleteContact}/>
+      <Persons persons={persons} filter={filter} deleteContact={deleteContact}/>
     </div>
   )
 }
