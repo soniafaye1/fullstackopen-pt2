@@ -1,12 +1,23 @@
 import { useEffect, useState } from 'react'
 import phoneService from './services/phoneNumbers'
+import './index.css'
+
+const Notification = ({messageType, message}) => {
+  if(message === null){
+    return null;
+  }
+
+  return (
+    <div className={messageType}>{message}</div>
+  )
+}
 
 const Persons = ({persons, filter, deleteContact}) => (
     <ul>
         {persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase())).map(person => 
             <li key={person.name}>
                 {person.name} {person.number}
-                <button onClick={() => deleteContact(person.id)}>delete</button>
+                <button onClick={() => deleteContact(person.id, person.name)}>delete</button>
             </li>
         )}
     </ul>
@@ -36,15 +47,12 @@ const Filter = ({ filter, handleFilter}) => (
 )
 
 const PhoneBook = () => {
-    const [persons, setPersons] = useState([
-        { name: 'Arto Hellas', number: '040-123456', id: 1 },
-        { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-        { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-        { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-      ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState("")
 
   const handleNewName = (event) => {
     setNewName(event.target.value)
@@ -67,25 +75,41 @@ const PhoneBook = () => {
         id: String(persons.length + 1),
     }
 
-    let nameExists = persons.find(p => p.name.toLowerCase() === newPerson.name.toLowerCase())
-    nameExists.number = newNumber;
-
-    console.log("existing name: ", nameExists)
+    const nameExists = persons.find(p => p.name.toLowerCase() === newPerson.name.toLowerCase())    
 
     if(nameExists && window.confirm(`are you sure you want to update ${nameExists.name}'s number ?`) ){
-        phoneService.update(nameExists.id, nameExists).then(updatedPerson => {console.log("uP: ", updatedPerson); setPersons(persons.map(p => p.id === nameExists.id ? updatedPerson : p))}).catch(e => console.log(e))
+      nameExists.number = newNumber;  
+      phoneService.update(nameExists.id, nameExists)
+        .then(updatedPerson => {
+          setPersons(persons.map(p => p.id !== updatedPerson.id ? p : updatedPerson))
+          setMessage(`Updated ${updatedPerson.name}`)
+          setMessageType("success")
+          setTimeout(() => {setMessage(null)}, 5000)
+        })
+        .catch(e => {console.log(e)})
 
     }else{
-        phoneService.create(newPerson).then(returnedPerson => {setPersons(persons.concat(returnedPerson))})
-
+        phoneService.create(newPerson).then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setMessage(`Added ${returnedPerson.name}`);
+          setMessageType("success")
+          setTimeout(() => {setMessage(null)}, 5000)
+        })
+        .catch(e => {console.log(e)})
     }
-
     setNewName('') 
     setNewNumber('')
   }
 
-  const deleteContact = (id) => {
-    phoneService.deletePerson(id).then(setPersons(persons.filter(p => p.id !== id)))
+  const deleteContact = (id, name) => {
+
+    phoneService.deletePerson(id)
+    .then(setPersons(persons.filter(p => p.id !== id)))
+    .catch(e => {
+      setMessage(`${name} has already been deleted`)
+      setMessageType("error")
+      console.log(e)
+    })
   }
 
   useEffect(() => {
@@ -95,10 +119,12 @@ const PhoneBook = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification messageType={messageType} message={message} />
+
       <Filter filter={filter} handleFilter={handleFilter}/>
 
       <h3>add a new </h3>
-      <PersonForm newName={newName} handleNewName={handleNewName} newNumber={newNumber} handleNewNumber={handleNewNumber}handleNewContact={handleNewContact} />
+      <PersonForm newName={newName} handleNewName={handleNewName} newNumber={newNumber} handleNewNumber={handleNewNumber} handleNewContact={handleNewContact} />
 
       <h3>Numbers</h3>
       <Persons persons={persons} filter={filter} deleteContact={deleteContact}/>
