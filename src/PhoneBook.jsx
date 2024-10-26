@@ -47,7 +47,7 @@ const Filter = ({ filter, handleFilter}) => (
 )
 
 const PhoneBook = () => {
-  const [persons, setPersons] = useState([])
+  const [persons, setPersons] = useState(null)
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
@@ -114,7 +114,11 @@ const PhoneBook = () => {
 
   useEffect(() => {
     phoneService.getAll().then(allPersons => setPersons(allPersons))
-  },[])
+  },[persons])
+
+  if(!persons){
+    return null
+  }
 
   return (
     <div>
